@@ -2,7 +2,7 @@
 """A CLI utility for generating JSON resumes per the 1.0.0 spec."""
 import argparse
 import sys
-from schema import Schema
+from resume import Resume
 
 LOGO = """
      ██ ███████  ██████  ███    ██     ██████  ███████ ███████ ██    ██ ███    ███ ███████ 
@@ -14,6 +14,8 @@ LOGO = """
 """
 VERSION = "0.0.1"
 
+resume = Resume()
+
 
 def get_version():
     """Print the version and exit."""
@@ -22,11 +24,17 @@ def get_version():
 
 
 def init_sub_command(args):
-    """Options for the init sub-command."""
+    """Operations for the init sub-command."""
     if args.json_resume:
-        Schema.get_json_sample()
+        resume.get_json_sample()
     if args.yaml_resume:
-        Schema.get_yaml_sample()
+        resume.get_yaml_sample()
+
+
+def resume_sub_command(args):
+    """Operations for the resume sub-command."""
+    if args.validate:
+        resume.validate_schema(args.validate)
 
 
 def main(argv=None):
@@ -63,6 +71,16 @@ def main(argv=None):
                               action='store_true',
                               help='Initialize a new resume as YAML.')
 
+    # Add the 'resume' sub-command.
+    resume_command = subcommand_job_options.add_parser('resume',
+                                                       help='Resume operations.')
+    resume_command.add_argument('-v',
+                                '--validate',
+                                default=False,
+                                action='store',
+                                metavar='RESUME',
+                                help='Validate the schema of the specified file.')
+
     args = job_options.parse_args(argv)
 
     if args.version:
@@ -71,6 +89,9 @@ def main(argv=None):
     # The 'init' sub-command.
     if args.command == 'init':
         init_sub_command(args)
+
+    if args.command == 'resume':
+        resume_sub_command(args)
 
 
 if __name__ == "__main__":
